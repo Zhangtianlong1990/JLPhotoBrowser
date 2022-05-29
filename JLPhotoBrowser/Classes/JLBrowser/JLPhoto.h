@@ -17,5 +17,7 @@
  *  大图URL
  */
 @property (nonatomic,strong) NSString *bigImgUrl;
-
+/*索引*/
+@property (nonatomic,assign) int index;
+- (instancetype)initWithSourceImageView:(UIImageView *)sourceImageView bigImgUrl:(NSString *)bigImgUrl;
 @end

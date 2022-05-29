@@ -112,23 +112,13 @@
     for (int i=0; i<self.imageViews.count; i++) {
         
         UIImageView *child = self.imageViews[i];
-        JLPhoto *photo = [[JLPhoto alloc] init];
-        //1.1设置原始imageView
-        photo.sourceImageView = child;
-        //1.2设置大图URL
-        photo.bigImgUrl = self.bigImgUrls[i];
-        //1.3设置图片tag
-        photo.tag = i;
+        JLPhoto *photo = [[JLPhoto alloc] initWithSourceImageView:child bigImgUrl:self.bigImgUrls[i]];
         [photos addObject:photo];
         
     }
     
     //2. 创建图片浏览器
     JLPhotoBrowser *photoBrowser = [JLPhotoBrowser photoBrowserWithPhotos:photos currentIndex:(int)tap.view.tag];
-//    //2.1 设置JLPhoto数组
-//    photoBrowser.photos = photos;
-//    //2.2 设置当前要显示图片的tag
-//    photoBrowser.currentIndex = (int)tap.view.tag;
 //    //2.3 显示图片浏览器
     [photoBrowser show];
 }

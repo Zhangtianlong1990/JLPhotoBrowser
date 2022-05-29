@@ -10,16 +10,15 @@
 
 @implementation JLPhoto
 
-- (instancetype)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
+- (instancetype)initWithSourceImageView:(UIImageView *)sourceImageView bigImgUrl:(NSString *)bigImgUrl{
+    self = [super init];
     if (self) {
-        
+        self.sourceImageView = sourceImageView;
+        self.bigImgUrl = bigImgUrl;
         //不裁剪的话，缩放的时候会看到两边多余的部分
         self.clipsToBounds = YES;
         self.userInteractionEnabled  = YES;
         self.contentMode = UIViewContentModeScaleAspectFill;
-        
     }
     return self;
 }
