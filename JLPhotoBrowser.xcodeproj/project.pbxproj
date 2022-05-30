@@ -41,6 +41,7 @@
 		890380DC1E8018130006423F /* preview_image_failure.png in Resources */ = {isa = PBXBuildFile; fileRef = 890380DA1E8018130006423F /* preview_image_failure.png */; };
 		890380DD1E8018130006423F /* preview_image_failure@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 890380DB1E8018130006423F /* preview_image_failure@2x.png */; };
 		8911D2E91E85F2F500E270EC /* Picture.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8911D2E81E85F2F500E270EC /* Picture.plist */; };
+		892904BE2843C9C8009A790F /* JLPhotoBrowserViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 892904BD2843C9C8009A790F /* JLPhotoBrowserViewModel.m */; };
 		893D0FDE1EADECD7005937FD /* JLImageListView.m in Sources */ = {isa = PBXBuildFile; fileRef = 893D0FDD1EADECD7005937FD /* JLImageListView.m */; };
 		894C5B411E69107A00B32730 /* 1.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 894C5B401E69107A00B32730 /* 1.jpg */; };
 		89D3045F1EADFDCD00D58039 /* JLNetworkViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 89D3045E1EADFDCD00D58039 /* JLNetworkViewController.m */; };
@@ -153,6 +154,10 @@
 		890380DA1E8018130006423F /* preview_image_failure.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = preview_image_failure.png; sourceTree = "<group>"; };
 		890380DB1E8018130006423F /* preview_image_failure@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "preview_image_failure@2x.png"; sourceTree = "<group>"; };
 		8911D2E81E85F2F500E270EC /* Picture.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Picture.plist; sourceTree = "<group>"; };
+		892904BC2843C9C8009A790F /* JLPhotoBrowserViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLPhotoBrowserViewModel.h; sourceTree = "<group>"; };
+		892904BD2843C9C8009A790F /* JLPhotoBrowserViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JLPhotoBrowserViewModel.m; sourceTree = "<group>"; };
+		892904BF2843CA63009A790F /* JLPhotoBrowserInputProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLPhotoBrowserInputProtocol.h; sourceTree = "<group>"; };
+		892904C02843CC2F009A790F /* JLPhotoBrowserOutputProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLPhotoBrowserOutputProtocol.h; sourceTree = "<group>"; };
 		893D0FDC1EADECD7005937FD /* JLImageListView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JLImageListView.h; sourceTree = "<group>"; };
 		893D0FDD1EADECD7005937FD /* JLImageListView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JLImageListView.m; sourceTree = "<group>"; };
 		894C5B401E69107A00B32730 /* 1.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 1.jpg; sourceTree = "<group>"; };
@@ -391,6 +396,10 @@
 				89D3046A1EAE0AD400D58039 /* JLPhoto.m */,
 				89D3046B1EAE0AD400D58039 /* JLPhotoBrowser.h */,
 				89D3046C1EAE0AD400D58039 /* JLPhotoBrowser.m */,
+				892904BC2843C9C8009A790F /* JLPhotoBrowserViewModel.h */,
+				892904BD2843C9C8009A790F /* JLPhotoBrowserViewModel.m */,
+				892904BF2843CA63009A790F /* JLPhotoBrowserInputProtocol.h */,
+				892904C02843CC2F009A790F /* JLPhotoBrowserOutputProtocol.h */,
 				89D3046D1EAE0AD400D58039 /* JLPieProgressView.h */,
 				89D3046E1EAE0AD400D58039 /* JLPieProgressView.m */,
 			);
@@ -577,6 +586,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -678,6 +688,7 @@
 				0D4798251C2C325C0022198A /* SDWebImageDownloader.m in Sources */,
 				89D304A31EAE0B8000D58039 /* JLNavigationController.m in Sources */,
 				89D304B81EAE0B8000D58039 /* JLScrollView.m in Sources */,
+				892904BE2843C9C8009A790F /* JLPhotoBrowserViewModel.m in Sources */,
 				0D47982D1C2C325C0022198A /* UIImageView+HighlightedWebCache.m in Sources */,
 				0D4798241C2C325C0022198A /* SDWebImageDecoder.m in Sources */,
 				89D304A51EAE0B8000D58039 /* ALAsset+Associate.m in Sources */,

@@ -16,8 +16,10 @@
 #import "JLPhotoBrowser.h"
 #import "UIImageView+WebCache.h"
 #import "JLPieProgressView.h"
+#import "JLPhotoBrowserOutputProtocol.h"
+#import "JLPhotoBrowserViewModel.h"
 
-@interface JLPhotoBrowser()<UIScrollViewDelegate>
+@interface JLPhotoBrowser()<UIScrollViewDelegate,JLPhotoBrowserOutputProtocol>
 /**
  *  底层滑动的scrollview
  */
@@ -30,6 +32,8 @@
  *  原始frame数组
  */
 @property (nonatomic,strong) NSMutableArray *sourceImageRects;
+@property (nonatomic,strong) NSMutableArray<JLPieProgressView *> *progressViews;
+@property (nonatomic,strong) JLPhotoBrowserViewModel *viewModel;
 @end
 
 @implementation JLPhotoBrowser
@@ -39,6 +43,13 @@
         _sourceImageRects = [NSMutableArray array];
     }
     return _sourceImageRects;
+}
+
+- (NSMutableArray *)progressViews{
+    if (_progressViews == nil) {
+        _progressViews = [NSMutableArray array];
+    }
+    return _progressViews;
 }
 
 + (instancetype)photoBrowserWithPhotos:(NSArray<JLPhoto *> *)photos currentIndex:(int)currentIndex{
@@ -51,11 +62,16 @@
         
         self.photos = photos;
         self.currentIndex = currentIndex;
+        [self initWithViewModel];
         [self convertImageRects];
         [self setupViews];
         
     }
     return self;
+}
+
+- (void)initWithViewModel{
+    self.viewModel = [[JLPhotoBrowserViewModel alloc] initWithOutputScreen:self];
 }
 
 -(void)show{
@@ -77,8 +93,6 @@
 
 -(void)setupSmallScrollViews{
     
-    __weak JLPhotoBrowser *weakSelf = self;
-    
     for (int i=0; i<self.photos.count; i++) {
         
         UIScrollView *smallScrollView = [self setupSmallScrollView:i];
@@ -87,50 +101,14 @@
         
         JLPieProgressView *progressView = [self creatProgressWithTag:i];
         [smallScrollView addSubview:progressView];
+        [self.progressViews addObject:progressView];
         
         //检查图片是否已经缓存过
-        [[SDImageCache sharedImageCache] queryDiskCacheForKey:photo.bigImgUrl done:^(UIImage *image, SDImageCacheType cacheType) {
-            if (image==nil) {//没有缓存过就显示loading
-                progressView.hidden = NO;
-            }
-        }];
-        
-        [photo sd_setImageWithURL:[NSURL URLWithString:photo.bigImgUrl] placeholderImage:nil options:SDWebImageRetryFailed | SDWebImageLowPriority progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-            //设置进度条
-            dispatch_async(dispatch_get_main_queue(), ^{
-                progressView.progressValue = (CGFloat)receivedSize/(CGFloat)expectedSize;
-            });
-            
-        } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
-            
-            if (image!=nil) {
-                
-                progressView.hidden = YES;
-                
-                //下载回来的图片
-                if (cacheType==SDImageCacheTypeNone) {
-                    [weakSelf setupPhotoFrame:photo];
-                }else{
-                    photo.frame = [weakSelf.sourceImageRects[i] CGRectValue];
-                    [UIView animateWithDuration:0.3 animations:^{
-                        [weakSelf setupPhotoFrame:photo];
-                    }];
-                }
-            }else{
-                
-                //图片下载失败
-                photo.bounds = CGRectMake(0, 0, 240, 240);
-                photo.center = CGPointMake(ScreenWidth/2, ScreenHeight/2);
-                photo.contentMode = UIViewContentModeScaleAspectFit;
-                photo.image = [UIImage imageNamed:@"preview_image_failure"];
-                
-                [progressView removeFromSuperview];
-                
-            }
-            
-        }];
+        [self.viewModel queryDiskCacheWithPhoto:photo];
+        [self.viewModel setImageWithPhoto:photo];
         
     }
+    
     
 }
 
@@ -204,57 +182,15 @@
 #pragma mark - Action
 
 -(void)doubleTap:(UITapGestureRecognizer *)doubleTap{
-    
-    [UIView animateWithDuration:0.3 animations:^{
-        
-        UIScrollView *smallScrollView = (UIScrollView *)doubleTap.view.superview;
-        smallScrollView.zoomScale = 3.0;
-        
-    }];
-    
+    [self.viewModel didDoubleClickPhoto:doubleTap];
 }
 
 -(void)singleTap:(UITapGestureRecognizer *)singleTap{
-    
-    //1.将图片缩放回一倍，然后再缩放回原来的frame，否则由于屏幕太小动画直接从3倍缩回去，看不完整
-    JLPhoto *photo = (JLPhoto *)singleTap.view;
-    UIScrollView *smallScrollView = (UIScrollView *)photo.superview;
-    smallScrollView.zoomScale = 1.0;
-    
-    //1.1如果是长图片先将其移动到CGPointMake(0, 0)在缩放回去 
-    if (CGRectGetHeight(photo.frame)>ScreenHeight) {
-        smallScrollView.contentOffset = CGPointMake(0, 0);
-    }
-    
-    //2.再取出原始frame，缩放回去
-    CGRect frame = [self.sourceImageRects[photo.index] CGRectValue];
-    
-    [UIView animateWithDuration:0.3 animations:^{
-        
-        photo.frame = frame;
-        self.blackView.alpha = 0;
-        
-    }completion:^(BOOL finished) {
-        
-        [self removeFromSuperview];
-        
-    }];
-    
+    [self.viewModel didSimgleClickPhoto:singleTap];
 }
 
 -(void)progressTap:(UITapGestureRecognizer *)tap{
-    
-    [UIView animateWithDuration:0.3 animations:^{
-        
-        self.blackView.alpha = 0;
-        tap.view.alpha = 0;
-        
-    }completion:^(BOOL finished) {
-        
-        [self removeFromSuperview];
-        
-    }];
-    
+    [self.viewModel didClickProgressView:tap];
 }
 
 #pragma mark UIScrollViewDelegate
@@ -331,11 +267,8 @@
 #pragma mark 设置frame
 
 -(void)setFrame:(CGRect)frame{
-    
     frame = CGRectMake(0, 0, ScreenWidth, ScreenHeight);
-    
     [super setFrame:frame];
-    
 }
 
 #pragma mark - private
@@ -350,6 +283,82 @@
         
     }
     
+}
+
+#pragma mark - JLPhotoBrowserOutputProtocol
+
+- (void)setProgressViewVisibilityWithPhoto:(JLPhoto *)aPhoto visibility:(BOOL)visibility{
+    self.progressViews[aPhoto.index].hidden = visibility;
+}
+    
+- (void)setupProgress:(CGFloat)progress photo:(JLPhoto *)aPhoto{
+    self.progressViews[aPhoto.index].progressValue = progress;
+}
+    
+- (void)callbackImage:(UIImage *)image cacheType:(SDImageCacheType)cacheType aPhoto:(JLPhoto *)aPhoto{
+    if (image!=nil) {
+        
+        self.progressViews[aPhoto.index].hidden = YES;
+        
+        //下载回来的图片
+        if (cacheType==SDImageCacheTypeNone) {
+            [self setupPhotoFrame:aPhoto];
+        }else{
+            aPhoto.frame = [self.sourceImageRects[aPhoto.index] CGRectValue];
+            [UIView animateWithDuration:0.3 animations:^{
+                [self setupPhotoFrame:aPhoto];
+            }];
+        }
+    }else{
+        
+        //图片下载失败
+        aPhoto.bounds = CGRectMake(0, 0, 240, 240);
+        aPhoto.center = CGPointMake(ScreenWidth/2, ScreenHeight/2);
+        aPhoto.contentMode = UIViewContentModeScaleAspectFit;
+        aPhoto.image = [UIImage imageNamed:@"preview_image_failure"];
+        
+        [self.progressViews[aPhoto.index] removeFromSuperview];
+    }
+}
+    
+- (void)enlargeSmallScrollView:(UITapGestureRecognizer *)aTap{
+    [UIView animateWithDuration:0.3 animations:^{
+        
+        UIScrollView *smallScrollView = (UIScrollView *)aTap.view.superview;
+        smallScrollView.zoomScale = 3.0;
+        
+    }];
+}
+
+- (void)shrinkSmallScrollViewAndDismiss:(UITapGestureRecognizer *)aTap{
+    //1.将图片缩放回一倍，然后再缩放回原来的frame，否则由于屏幕太小动画直接从3倍缩回去，看不完整
+    JLPhoto *photo = (JLPhoto *)aTap.view;
+    UIScrollView *smallScrollView = (UIScrollView *)photo.superview;
+    smallScrollView.zoomScale = 1.0;
+    
+    //1.1如果是长图片先将其移动到CGPointMake(0, 0)在缩放回去
+    if (CGRectGetHeight(photo.frame)>ScreenHeight) {
+        smallScrollView.contentOffset = CGPointMake(0, 0);
+    }
+    
+    //2.再取出原始frame，缩放回去
+    CGRect frame = [self.sourceImageRects[photo.index] CGRectValue];
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        photo.frame = frame;
+        self.blackView.alpha = 0;
+    }completion:^(BOOL finished) {
+        [self removeFromSuperview];
+    }];
+}
+
+- (void)dismissBrowser:(UITapGestureRecognizer *)aTap{
+    [UIView animateWithDuration:0.3 animations:^{
+        self.blackView.alpha = 0;
+        aTap.view.alpha = 0;
+    }completion:^(BOOL finished) {
+        [self removeFromSuperview];
+    }];
 }
 
 #pragma mark - UI
